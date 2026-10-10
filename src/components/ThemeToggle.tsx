@@ -1,34 +1,25 @@
 import { useEffect, useState } from 'react'
+import {
+  applyThemeToDocument,
+  getNextMode,
+  readStoredMode,
+  type ThemeMode,
+} from './theme'
 
-type ThemeMode = 'light' | 'dark' | 'auto'
+function prefersDark(): boolean {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+}
+
+function applyThemeMode(mode: ThemeMode) {
+  applyThemeToDocument(document, mode, prefersDark())
+}
 
 function getInitialMode(): ThemeMode {
   if (typeof window === 'undefined') {
     return 'auto'
   }
 
-  const stored = window.localStorage.getItem('theme')
-  if (stored === 'light' || stored === 'dark' || stored === 'auto') {
-    return stored
-  }
-
-  return 'auto'
-}
-
-function applyThemeMode(mode: ThemeMode) {
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-  const resolved = mode === 'auto' ? (prefersDark ? 'dark' : 'light') : mode
-
-  document.documentElement.classList.remove('light', 'dark')
-  document.documentElement.classList.add(resolved)
-
-  if (mode === 'auto') {
-    document.documentElement.removeAttribute('data-theme')
-  } else {
-    document.documentElement.setAttribute('data-theme', mode)
-  }
-
-  document.documentElement.style.colorScheme = resolved
+  return readStoredMode((key) => window.localStorage.getItem(key))
 }
 
 export default function ThemeToggle() {
@@ -55,8 +46,7 @@ export default function ThemeToggle() {
   }, [mode])
 
   function toggleMode() {
-    const nextMode: ThemeMode =
-      mode === 'light' ? 'dark' : mode === 'dark' ? 'auto' : 'light'
+    const nextMode = getNextMode(mode)
     setMode(nextMode)
     applyThemeMode(nextMode)
     window.localStorage.setItem('theme', nextMode)
@@ -73,6 +63,8 @@ export default function ThemeToggle() {
       onClick={toggleMode}
       aria-label={label}
       title={label}
+      data-testid="theme-toggle"
+      data-theme-mode={mode}
       className="rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] px-3 py-1.5 text-sm font-semibold text-[var(--sea-ink)] shadow-[0_8px_22px_rgba(30,90,72,0.08)] transition hover:-translate-y-0.5"
     >
       {mode === 'auto' ? 'Auto' : mode === 'dark' ? 'Dark' : 'Light'}

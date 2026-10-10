@@ -90,6 +90,7 @@ body {
   color: var(--sea-ink);
   font-family: var(--font-sans);
   background-color: var(--bg-base);
+  transition: background-color 300ms ease, color 300ms ease, border-color 300ms ease;
   background:
     radial-gradient(1100px 620px at -8% -10%, var(--hero-a), transparent 58%),
     radial-gradient(1050px 620px at 112% -12%, var(--hero-b), transparent 62%),
@@ -459,6 +460,15 @@ a {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body,
+  button,
+  .island-shell,
+  a {
+    transition: none;
   }
 }
 
